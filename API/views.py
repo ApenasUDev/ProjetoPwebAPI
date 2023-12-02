@@ -1,11 +1,17 @@
+from rest_framework import generics
+from .models import *
+from .serializers import UsuariosSerializer,FavoritosSerializer,AvaliacaoSerializer
 
-from django.shortcuts import render
-
-# Create your views here.
-from rest_framework import viewsets
-from .models import Usuarios
-from API.serializers import UsuariosSerializer
-
-class UsuariosViewSet(viewsets.ModelViewSet):
-    queryset = Usuarios.objects.all()
+class novo_usuario(generics.CreateAPIView):
     serializer_class = UsuariosSerializer
+    
+    def get_queryset(self):
+        queryset = Usuarios.objects.all()
+        favoritos = self.request.query_parems.get('favoritos')
+        if favoritos is not None:
+            queryset = queryset.filter(usuario=favoritos)
+        return queryset
+class list_usuario(generics.ListAPIView):
+    serializer_class = UsuariosSerializer
+    queryset = Usuarios.objects.all()
+    

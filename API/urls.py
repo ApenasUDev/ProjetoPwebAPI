@@ -1,11 +1,7 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import UsuariosViewSet
-
-router = DefaultRouter()
-router.register(r'usuarios', UsuariosViewSet)
+from django.urls import path
+from .views import novo_usuario,list_usuario
 
 urlpatterns = [
-    path('api/', include(router.urls)),
-    # Adicione outras URLs de autenticação aqui
+    path('novousuario/',novo_usuario.as_view()),
+    path('usuarios/',list_usuario.as_view()),
 ]

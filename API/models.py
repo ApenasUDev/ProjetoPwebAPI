@@ -11,6 +11,7 @@ class Usuarios(models.Model):
     def __str__(self) -> str:
         return self.nome_usuario
 class Favoritos(models.Model):
+    usuario = models.OneToOneField(Usuarios,on_delete=models.CASCADE)
     id_card = models.IntegerField()
     nome_card = models.CharField(max_length=125)
     
