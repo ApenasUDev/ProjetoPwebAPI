@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from Yugiohapp.models import *
+from .models import *
 class UsuariosSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuarios

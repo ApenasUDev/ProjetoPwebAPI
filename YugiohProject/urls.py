@@ -16,7 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
-from Yugiohapp import urls as Yugiohapp_urls
+from API import urls as Yugiohapp_urls
 urlpatterns = [
     path('',include(Yugiohapp_urls)),
     path('admin/', admin.site.urls),
