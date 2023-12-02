@@ -5,8 +5,9 @@ class Usuarios(models.Model):
     nome_usuario = models.CharField(max_length=255,unique=True)
     email = models.CharField(max_length=255,unique=True)
     senha = models.CharField(max_length=25)
-    data_cadastro = models.DateField()
-    img_perfil = models.ImageField()
+    data_cadastro = models.DateField(auto_now=True)
+
+    # img_perfil = models.ImageField()
     def __str__(self) -> str:
         return self.nome_usuario
 class Favoritos(models.Model):
