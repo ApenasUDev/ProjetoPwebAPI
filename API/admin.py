@@ -1,7 +1,5 @@
 from django.contrib import admin
-from .models import *
+from API.models import Usuario
 # Register your models here.
 
-admin.site.register(Usuarios)
-admin.site.register(Favoritos)
-admin.site.register(Avaliacao)
+admin.site.register(Usuario)

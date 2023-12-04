@@ -1,28 +1,19 @@
 from django.db import models
+from pygments.lexers import get_lexer_by_name
+from pygments.formatters.html import HtmlFormatter
+from pygments import highlight
 
-# Create your models here.
-class Usuarios(models.Model):
-    nome_usuario = models.CharField(max_length=255,unique=True)
-    email = models.CharField(max_length=255,unique=True)
-    senha = models.CharField(max_length=25)
-    data_cadastro = models.DateField(auto_now=True)
+class Usuario(models.Model):
+    data_cadastro = models.DateTimeField(auto_now_add=True)
+    nome_usuario = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    senha = models.CharField(max_length=255)  # Ajuste o tamanho conforme necessário
+    owner = models.ForeignKey('auth.User', related_name='usuario', on_delete=models.CASCADE)
 
-    # img_perfil = models.ImageField()
+    class Meta:
+        ordering = ['data_cadastro']
+
+
+
     def __str__(self) -> str:
         return self.nome_usuario
-class Favoritos(models.Model):
-    usuario = models.OneToOneField(Usuarios,on_delete=models.CASCADE)
-    id_card = models.IntegerField()
-    nome_card = models.CharField(max_length=125)
-    
-    def __str__(self) -> str:
-        return self.nome_card
-class Avaliacao(models.Model):
-    usuario = models.OneToOneField(Usuarios,on_delete=models.CASCADE)
-    id_card = models.IntegerField()
-    nome_card = models.CharField(max_length=125)
-    estrelas = models.IntegerField()
-    
-    def __str__(self) -> str:
-        return self.nome_card
-    

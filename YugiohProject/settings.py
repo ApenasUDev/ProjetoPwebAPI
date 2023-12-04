@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-_$1x(&6zzn1@642asdefn3@3tq%tgj8rd)e43tqxs28_5d@=hz'
+SECRET_KEY = 'django-insecure-kxu6k5ky9)hjziboe=(hp5b1uqls-4vb*r@u*zwi@tj#af+_x6'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,9 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
-    'rest_framework_simplejwt',
     'API.apps.ApiConfig',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -51,13 +50,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ),
-}
+
 ROOT_URLCONF = 'YugiohProject.urls'
 
 TEMPLATES = [
