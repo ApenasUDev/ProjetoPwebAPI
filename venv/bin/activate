@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/home/apenasudev/Documentos/GitHub/ProjetoPwebAPI/venv"
+VIRTUAL_ENV="/home/apenasudev/Área de trabalho/testebanckend/backend/venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
