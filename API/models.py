@@ -5,7 +5,7 @@ class Usuario(models.Model):
     username = models.CharField(max_length=255,unique=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=25)
-    data_creacao = models.DateTimeField(auto_now_add=True)
+    data_criacao = models.DateField(auto_now_add=True)
     
     def __str__(self):
         return self.username
