@@ -37,10 +37,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'API.apps.ApiConfig',
     'corsheaders',
-]
+    'rest_framework',    
+    'rest_framework.authtoken',    
+    'allauth',    
+    'allauth.account',    
+    'rest_auth',    
+    'rest_auth.registration'
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -51,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Add the address of your Next.js app
