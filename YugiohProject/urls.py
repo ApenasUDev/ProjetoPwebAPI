@@ -22,4 +22,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('visucards/',views.visucards,name='visucards'),
     path('buscarcards/',views.buscar_card,name='buscarcards'),
+    path('users/register/',views.register,name='register-users'),
 ]

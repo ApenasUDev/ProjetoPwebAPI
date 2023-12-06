@@ -1,6 +1,10 @@
 from django.shortcuts import render
 import requests
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
+from pocketbase import PocketBase  # Client also works the same
+# from pocketbase.client import FileUpload
+
+
 # Create your views here.
 def FilterCard(resultados):
     if resultados["type"] == "Trap Card" or resultados["type"] == "Spell Card": # erifica se o tipo da carta ("type") é igual a "Trap Card" ou "Spell Card".
@@ -91,3 +95,37 @@ def buscar_card(request):
         contexto = {"cards": []}  # Lista vazia em caso de erro
 
     return JsonResponse(contexto) #     Retorna o json  com o contexto preparado.
+
+## poketbase
+
+def autentication(username,password):
+    pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app/api/collections/users/auth-with-password')
+    authData =  pb.collection('users').authWithPassword(
+    username,
+    password,
+    )
+    pb.authStore.clear()
+    return authData
+def register(request):
+    if request.method == 'GET':
+        pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
+
+        username = request.GET.get('username', '')
+        email = request.GET.get('email', '')
+        password = request.GET.get('password', '')
+        password_confirm = request.GET.get('password_confirm', '')
+        name = request.GET.get('name', '')
+
+        data = {
+            "username": username,
+            "email": email,
+            "emailVisibility": True,
+            "password": password,
+            "passwordConfirm": password_confirm,
+            "name": name
+        }
+
+        record = pb.collection('users').create(data)
+
+        return JsonResponse({'status': 'success'})
+
