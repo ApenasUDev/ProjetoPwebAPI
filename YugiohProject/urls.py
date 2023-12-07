@@ -21,7 +21,7 @@ from yugiohapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',views.home,name='home'),
-    path('/visucards/',views.visucards,name='visucards'),
-    path('/buscarcards/',views.buscar_card,name='buscarcards'),
-    path('/users/register/',views.register,name='register-users'),
+    path('visucards/',views.visucards,name='visucards'),
+    path('buscarcards/',views.buscar_card,name='buscarcards'),
+    path('users/register/',views.register,name='register-users'),
 ]
