@@ -1,10 +1,9 @@
 from django.shortcuts import render
 import requests
-from django.http import JsonResponse,HttpResponse
+from django.http import JsonResponse,HttpResponse,response
 from pocketbase import PocketBase  # Client also works the same
 # from pocketbase.client import FileUpload
-def home():
-    return HttpResponse('teste de api')
+
 
 # Create your views here.
 def FilterCard(resultados):
