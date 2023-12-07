@@ -9,7 +9,7 @@ const Register = () => {
 
     const handleRegister = async () => {
         try {
-            const response = await axios.get('http://127.0.0.1:8001/users/register/', {
+            const response = await axios.get('http://127.0.0.1:8000/users/register/', {
                 params: { username: username, email: email, password: password, password_confirm: password_confirm, name: name }
             });
 

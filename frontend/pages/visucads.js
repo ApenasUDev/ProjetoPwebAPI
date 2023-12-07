@@ -6,7 +6,7 @@ export default function Visu() {
     useEffect(() => {
         const fetchData = async () => {
           try {
-            const response = await fetch('http://127.0.0.1:8001/visucards/');
+            const response = await fetch('http://127.0.0.1:8000/visucards/');
             const data = await response.json();
             console.log(data); // Verifique se os dados são impressos corretamente
             setCards(data.cards);
