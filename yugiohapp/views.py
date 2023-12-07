@@ -98,14 +98,17 @@ def buscar_card(request):
 
 ## poketbase
 
-def autentication(username,password):
-    pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app/api/collections/users/auth-with-password')
-    authData =  pb.collection('users').authWithPassword(
-    username,
-    password,
-    )
-    pb.authStore.clear()
-    return authData
+def autenticar(username, password):
+    pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
+    
+    try:
+        auth_data = pb.collection('users').auth_with_password(username_or_email=username, password=password)
+        pb.auth_store.clear()
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        print(f"Erro na autenticação: {e}")
+        return JsonResponse({'status': 'error', 'message': 'Erro na autenticação'})
+
 def register(request):
     if request.method == 'GET':
         pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
@@ -125,7 +128,17 @@ def register(request):
             "name": name
         }
 
-        record = pb.collection('users').create(data)
+        try:
+            record = pb.collection('users').create(data)
+            autenticar(username, password)
+            return JsonResponse({'status': 'success'})
+        except Exception as e:
+            print(f"Erro no registro: {e}")
+            return JsonResponse({'status': 'error', 'message': 'Erro no registro'})
 
-        return JsonResponse({'status': 'success'})
-
+def login(request):
+    pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
+    username = request.GET.get('username','')
+    if request.method == 'GET':
+        listusers = pb.collection('users').get_full_list({filter:f'users == "{username}'})
+        print(listusers)
