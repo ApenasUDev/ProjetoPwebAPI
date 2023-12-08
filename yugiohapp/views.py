@@ -1,8 +1,7 @@
-from django.shortcuts import render
 import requests
-from django.http import JsonResponse,HttpResponse,response
+from django.http import JsonResponse
 from pocketbase import PocketBase  # Client also works the same
-# from pocketbase.client import FileUpload
+from django.contrib.auth import authenticate, login
 
 
 # Create your views here.
@@ -98,16 +97,23 @@ def buscar_card(request):
 
 ## poketbase
 
-def autenticar(username, password):
-    pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
-    
-    try:
-        auth_data = pb.collection('users').auth_with_password(username_or_email=username, password=password)
-        pb.auth_store.clear()
-        return JsonResponse({'status': 'success'})
-    except Exception as e:
-        print(f"Erro na autenticação: {e}")
-        return JsonResponse({'status': 'error', 'message': 'Erro na autenticação'})
+def auth_with_password(identity, password):
+    # Make a request to the PocketBase API to authenticate the user
+    api_url = 'https://pocketbase-production-e3fc.up.railway.app/api/collections/users/auth-with-password'
+    data = {'identity': identity, 'password': password}
+    response = requests.post(api_url, data=data)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Extract the token and user data from the API response
+        auth_data = response.json()
+        token = auth_data.get('token')
+        user_data = auth_data.get('record')
+
+        return token, user_data
+
+    # If authentication fails, return None
+    return None, None
 
 def register(request):
     if request.method == 'GET':
@@ -129,16 +135,52 @@ def register(request):
         }
 
         try:
-            record = pb.collection('users').create(data)
-            autenticar(username, password)
-            return JsonResponse({'status': 'success'})
+            # Create the user
+            pb.collection('users').create(data)
+
+            # Authenticate the user after successful registration
+            token, user_data = auth_with_password(identity=email, password=password)
+            print('teste de token')
+            print(token)
+            if token and user_data:
+                # Login the user in Django
+                user = authenticate(request, username=user_data['username'], password=password)
+                if user is not None:
+                    login(request, user)
+
+                return JsonResponse({'status': 'success', 'token': token, 'record': user_data})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Authentication failed'})
+
         except Exception as e:
             print(f"Erro no registro: {e}")
             return JsonResponse({'status': 'error', 'message': 'Erro no registro'})
 
 def login(request):
-    pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
-    username = request.GET.get('username','')
-    if request.method == 'GET':
-        listusers = pb.collection('users').get_full_list({filter:f'users == "{username}'})
-        print(listusers)
+    # Get the 'username' parameter from the request's GET parameters
+    username = request.GET.get('username', '')
+    password = request.GET.get('password','')
+   # Replace 'YOUR_USERNAME_OR_EMAIL' and 'YOUR_PASSWORD' with actual values
+    data = {'identity': username, 'password': password}
+    url = 'https://pocketbase-production-e3fc.up.railway.app/api/collections/users/auth-with-password'
+
+    try:
+        response = requests.post(url, data=data)
+        response.raise_for_status()  # Check if the request was successful
+
+        # Parse the response JSON
+        auth_data = response.json()
+        token = auth_data['token']
+        print(f'Token: {token}')
+
+    except requests.exceptions.HTTPError as errh:
+        print(f"HTTP Error: {errh}")
+
+    except requests.exceptions.ConnectionError as errc:
+        print(f"Error Connecting: {errc}")
+
+    except requests.exceptions.Timeout as errt:
+        print(f"Timeout Error: {errt}")
+
+    except requests.exceptions.RequestException as err:
+        print(f"Error: {err}")

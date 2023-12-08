@@ -14,10 +14,9 @@ cd ProjetoPwebAPI
 ```
 source venv/bin/activate
 ```
-4.Baixe as dependências do Django:
+Instale as dependências do projeto:
 ```
-python3 manage.py makemigrations
-python3 manage.py migrate
+pip install -r requirements.txt
 ```
 5.Inicie o servidor:
 ```
