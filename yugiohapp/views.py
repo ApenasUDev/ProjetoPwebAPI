@@ -1,5 +1,5 @@
 import requests
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse
 from pocketbase import PocketBase  # Client also works the same
 from django.contrib.auth import authenticate, login
 
@@ -139,7 +139,7 @@ def register(request):
             pb.collection('users').create(data)
 
             # Authenticate the user after successful registration
-            token, user_data = auth_with_password(identity=email, password=password)
+            token, user_data = auth_with_password(email, password)
             print('teste de token')
             print(token)
             if token and user_data:
@@ -157,22 +157,36 @@ def register(request):
             return JsonResponse({'status': 'error', 'message': 'Erro no registro'})
 
 def login(request):
+    pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
+
     # Get the 'username' parameter from the request's GET parameters
-    username = request.GET.get('username', '')
+    username = request.GET.get('username','')
     password = request.GET.get('password','')
-   # Replace 'YOUR_USERNAME_OR_EMAIL' and 'YOUR_PASSWORD' with actual values
-    data = {'identity': username, 'password': password}
-    url = 'https://pocketbase-production-e3fc.up.railway.app/api/collections/users/auth-with-password'
 
+    # Usando get_list para buscar registros com filtro
+    results = pb.collection('users').get_list(
+        1, 20, {"filter": f'username = "{username}"'}
+    )
+    print(results)
+    if results.items == []:
+         print('Usuário não encontrado')
+         return HttpResponse('usuário não encontrado')
+    else:
+         print(results.items[0])
+         iduser =str(results.items[0])
+         print(iduser[9:24]) 
+
+    record = pb.collection('users').get_one(f'{iduser[9:24]}')                                
+    print(record.username)
+    print(record.email)
     try:
-        response = requests.post(url, data=data)
-        response.raise_for_status()  # Check if the request was successful
-
-        # Parse the response JSON
-        auth_data = response.json()
-        token = auth_data['token']
-        print(f'Token: {token}')
-
+         authData =pb.collection('users').auth_with_password(
+         f'{username}',
+         f'{password}',
+     )
+         print(authData.token)
+         TOKEN = authData.token
+         return JsonResponse({'token':f"{TOKEN}"})
     except requests.exceptions.HTTPError as errh:
         print(f"HTTP Error: {errh}")
 
@@ -184,3 +198,4 @@ def login(request):
 
     except requests.exceptions.RequestException as err:
         print(f"Error: {err}")
+    return HttpResponse("Login failed")

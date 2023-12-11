@@ -11,12 +11,14 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ALLOWED_HOSTS = ['https://projeto-pweb-api', '.vercel.app']
-# WSGI_APPLICATION = 'YugiohProject.wsgi.application'
+
+ALLOWED_HOSTS = ["projetopwebapi.fly.dev"]
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -24,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-f$=^s3(g17l76amxx6bk42ia#o0r6mb@u7^fsjhyrs)g6n03ya'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
 # ALLOWED_HOSTS = ["*"]
 
@@ -39,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'yugiohapp.apps.YugiohappConfig',
-    'corsheaders',
+     'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +57,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'YugiohProject.urls'
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_METHODS = ['GET', 'OPTIONS']
+CORS_ALLOW_METHODS = ['GET','POST','OPTIONS']
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    # Add other origins as needed
+]
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
