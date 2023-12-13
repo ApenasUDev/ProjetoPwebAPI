@@ -24,4 +24,6 @@ urlpatterns = [
     path('buscarcards/',views.buscar_card,name='buscarcards'),
     path('users/register/',views.register,name='register-users'),
     path('users/login/',views.login,name="login"),
+    path('users/dados-do-usuario/', views.dados_do_usuario, name='dados_do_usuario'),
 ]
+

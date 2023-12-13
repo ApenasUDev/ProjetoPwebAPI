@@ -1,8 +1,7 @@
 import requests
 from django.http import JsonResponse,HttpResponse
 from pocketbase import PocketBase  # Client also works the same
-from django.contrib.auth import authenticate, login
-
+from .models import Usuario
 
 # Create your views here.
 def FilterCard(resultados):
@@ -137,17 +136,21 @@ def register(request):
         try:
             # Create the user
             pb.collection('users').create(data)
-
-            # Authenticate the user after successful registration
             token, user_data = auth_with_password(email, password)
+            # salvando no models
+            usuario = Usuario()
+            usuario.username = username
+            usuario.email = email
+            usuario.password = password
+            usuario.password_confirm = password_confirm
+            usuario.name = name
+            usuario.token = token
+            usuario.save()
+            # Authenticate the user after successful registration
             print('teste de token')
             print(token)
             if token and user_data:
                 # Login the user in Django
-                user = authenticate(request, username=user_data['username'], password=password)
-                if user is not None:
-                    login(request, user)
-
                 return JsonResponse({'status': 'success', 'token': token, 'record': user_data})
             else:
                 return JsonResponse({'status': 'error', 'message': 'Authentication failed'})
@@ -156,46 +159,105 @@ def register(request):
             print(f"Erro no registro: {e}")
             return JsonResponse({'status': 'error', 'message': 'Erro no registro'})
 
+# Função de login
 def login(request):
     pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
 
-    # Get the 'username' parameter from the request's GET parameters
-    username = request.GET.get('username','')
-    password = request.GET.get('password','')
+    # Obter parâmetros 'username' e 'password' da solicitação POST
+    username = request.GET.get('username', '')
+    password = request.GET.get('password', '')
 
-    # Usando get_list para buscar registros com filtro
-    results = pb.collection('users').get_list(
-        1, 20, {"filter": f'username = "{username}"'}
-    )
-    print(results)
-    if results.items == []:
-         print('Usuário não encontrado')
-         return HttpResponse('usuário não encontrado')
-    else:
-         print(results.items[0])
-         iduser =str(results.items[0])
-         print(iduser[9:24]) 
+    # Verificar se o usuário existe
+    results = pb.collection('users').get_list(1, 1, {"filter": f'username = "{username}"'})
 
-    record = pb.collection('users').get_one(f'{iduser[9:24]}')                                
-    print(record.username)
-    print(record.email)
+    if not results.items:
+        return HttpResponse('Usuário não encontrado', status=404)
+
+    user_id = str(results.items[0])
+    user_record = pb.collection('users').get_one(user_id[9:24])
+
     try:
-         authData =pb.collection('users').auth_with_password(
-         f'{username}',
-         f'{password}',
-     )
-         print(authData.token)
-         TOKEN = authData.token
-         return JsonResponse({'token':f"{TOKEN}"})
-    except requests.exceptions.HTTPError as errh:
-        print(f"HTTP Error: {errh}")
+        # Autenticar usuário com PocketBase
+        usuario = Usuario.objects.all()
+        for user in usuario:
+            if user.username == username:
+                token = user.token
 
-    except requests.exceptions.ConnectionError as errc:
-        print(f"Error Connecting: {errc}")
+        if token:
+            return JsonResponse({'status': 'success', 'token': token})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Authentication failed'})
 
-    except requests.exceptions.Timeout as errt:
-        print(f"Timeout Error: {errt}")
+    except Exception as e:
+        print(f"Erro no registro: {e}")
+        return JsonResponse({'status': 'error', 'message': 'Erro no registro'})
+    
+from django.http import JsonResponse
+from .models import Usuario  # Certifique-se de ajustar o import para o local correto
 
-    except requests.exceptions.RequestException as err:
-        print(f"Error: {err}")
-    return HttpResponse("Login failed")
+def dados_do_usuario(request):
+    # Verificar se o token está presente no cabeçalho da solicitação
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+
+    print(token)
+    print(token[0:207])
+
+    if not token:
+        return JsonResponse({'status': 'error', 'message': 'Token não fornecido'}, status=401)
+
+    try:
+        print('teste try 1')
+    
+        print('teste try 2')
+
+        # Puxando os dados do modelo Usuario 
+        usuario = Usuario.objects.get(token=token)
+
+        user_info = {
+            'username': usuario.username,
+            'email': usuario.email,
+            'name': usuario.name
+        }
+
+        print('teste try 4')
+
+        # Verificar se o usuário existe
+        if user_info:
+            print('teste if user_info')
+
+            # Retorna os dados do usuário
+            return JsonResponse({
+                'status': 'success',
+                'username': user_info['username'],
+                'email': user_info['email'],
+                'name': user_info['name']
+                # Adicione mais informações do usuário conforme necessário
+            })
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Usuário não encontrado'}, status=404)
+
+    except Usuario.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Usuário não encontrado'}, status=404)
+
+    except Exception as e:
+        print(f"Erro ao obter dados do usuário: {e}")
+        return JsonResponse({'status': 'error', 'message': 'Erro ao obter dados do usuário'}, status=500)
+
+def FavoritarCard(request):
+    # Verificar se o token está presente no cabeçalho da solicitação
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+
+    print(token)
+    print(token[0:207])
+
+    if not token:
+        return JsonResponse({'status': 'error', 'message': 'Token não fornecido'}, status=401)
+    try:
+        id_card = request.GET.get('id_card','')
+    
+    except Usuario.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Usuário não encontrado'}, status=404)
+
+    except Exception as e:
+        print(f"Erro ao obter dados do usuário: {e}")
+        return JsonResponse({'status': 'error', 'message': 'Erro ao obter dados do usuário'}, status=500)
