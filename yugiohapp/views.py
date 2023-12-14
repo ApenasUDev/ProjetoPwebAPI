@@ -98,7 +98,7 @@ def buscar_card(request):
 
 def auth_with_password(identity, password):
     # Make a request to the PocketBase API to authenticate the user
-    api_url = 'https://pocketbase-production-e3fc.up.railway.app/api/collections/users/auth-with-password'
+    api_url = 'https://pocketbaseapipweb.fly.dev/api/collections/users/auth-with-password'
     data = {'identity': identity, 'password': password}
     response = requests.post(api_url, data=data)
 
@@ -116,7 +116,7 @@ def auth_with_password(identity, password):
 
 def register(request):
     if request.method == 'GET':
-        pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
+        pb = PocketBase('https://pocketbaseapipweb.fly.dev')
 
         username = request.GET.get('username', '')
         email = request.GET.get('email', '')
@@ -161,38 +161,45 @@ def register(request):
 
 # Função de login
 def login(request):
-    pb = PocketBase('https://pocketbase-production-e3fc.up.railway.app')
+    pb_api_url = 'https://projetopwebapi.fly.dev/list-users'
+    pb = PocketBase('https://pocketbaseapipweb.fly.dev')
 
     # Obter parâmetros 'username' e 'password' da solicitação POST
     username = request.GET.get('username', '')
     password = request.GET.get('password', '')
 
-    # Verificar se o usuário existe
-    results = pb.collection('users').get_list(1, 1, {"filter": f'username = "{username}"'})
+    # Fazer uma solicitação para a API para obter a lista de usuários
+    api_response = requests.get(pb_api_url)
+    api_users = api_response.json()
 
-    if not results.items:
-        return HttpResponse('Usuário não encontrado', status=404)
+    # Verificar se o usuário existe na API
+    api_user = next((user for user in api_users if user['username'] == username), None)
 
-    user_id = str(results.items[0])
-    user_record = pb.collection('users').get_one(user_id[9:24])
+    if not api_user:
+        return HttpResponse('Usuário não encontrado na API', status=404)
+
+    # Obter o token do usuário no PocketBase
+    user_id = api_user.get('id', '')
+    user_record = pb.collection('users').get_one(user_id)
 
     try:
         # Autenticar usuário com PocketBase
-        usuario = Usuario.objects.filter(username = username)
-        for user in usuario:
-            if  user.password == password:
-                token = user.token
-            else:
-                return HttpResponse('login ou senha incorretos')
+        usuario = Usuario.objects.filter(username=username).first()
+
+        if usuario and usuario.password == password:
+            token = usuario.token
+        else:
+            return HttpResponse('Login ou senha incorretos')
 
         if token:
             return JsonResponse({'status': 'success', 'token': token})
         else:
-            return JsonResponse({'status': 'error', 'message': 'Authentication failed'})
+            return JsonResponse({'status': 'error', 'message': 'Autenticação falhou'})
 
     except Exception as e:
         print(f"Erro no registro: {e}")
         return JsonResponse({'status': 'error', 'message': 'Erro no registro'})
+
     
 def dados_do_usuario(request):
     # Verificar se o token está presente no cabeçalho da solicitação
@@ -318,3 +325,14 @@ def visufavoritos(request):
     except Exception as e:
         print(f"Erro ao obter dados do usuário: {e}")
         return JsonResponse({'status': 'error', 'message': 'Erro ao obter dados do usuário'}, status=500)
+def return_users(request):
+    usuarios = Usuario.objects.all()
+
+    # Convert queryset to a list of dictionaries
+    usuarios_list = [{'id': usuario.id, 'nome': usuario.nome, 'email': usuario.email, 'username':usuario.username, 'password':usuario.password, 'password_confirm':usuario.password_confirm,'token':usuario.token} for usuario in usuarios]
+
+    # Create a JSON response
+    response_data = {'usuarios': usuarios_list}
+
+    # You can customize the JsonResponse as needed, setting appropriate headers, etc.
+    return JsonResponse(response_data)

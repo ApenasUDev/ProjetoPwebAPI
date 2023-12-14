@@ -26,5 +26,7 @@ urlpatterns = [
     path('users/dados-do-usuario/', views.dados_do_usuario, name='dados_do_usuario'),
     path('favoritar-card/', views.FavoritarCard, name='favoritar-card'),
     path('favoritos/', views.visufavoritos, name='favoritos'),
-    path('desfavoritar-card/', views.desfavoritar_card, name='desfavoritar_card'),]
+    path('desfavoritar-card/', views.desfavoritar_card, name='desfavoritar_card'),
+    path('list-users',views.return_users,name='return-users'),
+    ]
 
