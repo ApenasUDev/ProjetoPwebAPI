@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from yugiohapp import views
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('visucards/',views.visucards,name='visucards'),
@@ -25,5 +24,7 @@ urlpatterns = [
     path('users/register/',views.register,name='register-users'),
     path('users/login/',views.login,name="login"),
     path('users/dados-do-usuario/', views.dados_do_usuario, name='dados_do_usuario'),
-]
+    path('favoritar-card/', views.FavoritarCard, name='favoritar-card'),
+    path('favoritos/', views.visufavoritos, name='favoritos'),
+    path('desfavoritar-card/', views.desfavoritar_card, name='desfavoritar_card'),]
 

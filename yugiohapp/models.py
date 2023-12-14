@@ -11,5 +11,5 @@ class Usuario(models.Model):
     name = models.CharField(max_length=255)
     token = models.CharField(max_length=255)
 class Favorito(models.Model):
-    usuario = models.ForeignKey(Usuario,on_delete=models.CASCADE)
+    usuario = models.CharField(max_length=255)
     id_card = models.IntegerField()

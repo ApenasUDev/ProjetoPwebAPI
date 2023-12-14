@@ -1,7 +1,7 @@
 import requests
 from django.http import JsonResponse,HttpResponse
 from pocketbase import PocketBase  # Client also works the same
-from .models import Usuario
+from .models import Usuario, Favorito
 
 # Create your views here.
 def FilterCard(resultados):
@@ -178,10 +178,12 @@ def login(request):
 
     try:
         # Autenticar usuário com PocketBase
-        usuario = Usuario.objects.all()
+        usuario = Usuario.objects.filter(username = username)
         for user in usuario:
-            if user.username == username:
+            if  user.password == password:
                 token = user.token
+            else:
+                return HttpResponse('login ou senha incorretos')
 
         if token:
             return JsonResponse({'status': 'success', 'token': token})
@@ -192,9 +194,6 @@ def login(request):
         print(f"Erro no registro: {e}")
         return JsonResponse({'status': 'error', 'message': 'Erro no registro'})
     
-from django.http import JsonResponse
-from .models import Usuario  # Certifique-se de ajustar o import para o local correto
-
 def dados_do_usuario(request):
     # Verificar se o token está presente no cabeçalho da solicitação
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
@@ -244,17 +243,75 @@ def dados_do_usuario(request):
         return JsonResponse({'status': 'error', 'message': 'Erro ao obter dados do usuário'}, status=500)
 
 def FavoritarCard(request):
-    # Verificar se o token está presente no cabeçalho da solicitação
-    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    try:
+        if request.method == 'GET':
+            id_card = request.GET.get('id_card', '')
+            usuario = request.GET.get('usuario', '')
 
-    print(token)
-    print(token[0:207])
+            # Check if the card is already favorited by the user
+            if Favorito.objects.filter(id_card=id_card, usuario=usuario).exists():
+                return JsonResponse({'status': 'error', 'message': 'Card already favorited'}, status=400)
+
+            # Favoriting the card
+            favorito = Favorito()
+            favorito.id_card = id_card
+            favorito.usuario = usuario
+            favorito.save()
+
+            return JsonResponse({'status': 'success', 'message': 'Card favorited'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+    except Exception as e:
+        print(f"Error ao tentar favoritar card: {e}")
+        return JsonResponse({'status': 'error', 'message': 'Error favoriting card'}, status=500)
+
+def desfavoritar_card(request):
+    try:
+        if request.method == 'GET':
+            id_card = request.GET.get('id_card', '')
+            usuario = request.GET.get('usuario', '')
+            
+            # Check if the Favorito object exists
+            favorito = Favorito.objects.filter(id_card=id_card, usuario=usuario).first()
+
+            if favorito:
+                favorito.delete()
+                return JsonResponse({'status': 'success', 'message': 'Card removido com sucesso'})
+            else:
+                return JsonResponse({'status': 'error', 'message': 'Card não encontrado nos favoritos'}, status=400)
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+    except Exception as e:
+        print(f"Error ao tentar desfavoritar card: {e}")
+        return JsonResponse({'status': 'error', 'message': 'Error desfavoriting card'}, status=500)
+
+def visufavoritos(request):
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
 
     if not token:
         return JsonResponse({'status': 'error', 'message': 'Token não fornecido'}, status=401)
+
     try:
-        id_card = request.GET.get('id_card','')
-    
+        usuario = Usuario.objects.get(token=token)
+        favoritos = Favorito.objects.filter(usuario=usuario.username)
+
+        cards = []
+        for favorito in favoritos:
+            base_url_Card = f'https://db.ygoprodeck.com/api/v7/cardinfo.php?language=pt&id={favorito.id_card}'
+            try:
+                data = responseApI(base_url_Card)
+                if data["data"]:
+                    for resultados in data["data"]:
+                        cards_info = FilterCard(resultados)
+                        cards.append(cards_info)
+
+            except requests.exceptions.RequestException as e:
+                print(f"Erro na solicitação HTTP: {e}")
+
+        contexto = {"cards": cards}
+        return JsonResponse(contexto)
+
     except Usuario.DoesNotExist:
         return JsonResponse({'status': 'error', 'message': 'Usuário não encontrado'}, status=404)
 

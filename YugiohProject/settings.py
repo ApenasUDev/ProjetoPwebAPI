@@ -16,7 +16,7 @@ import os
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# ALLOWED_HOSTS = ["projetopwebapi.fly.dev"]
+ALLOWED_HOSTS = ["projetopwebapi.fly.dev"]
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-f$=^s3(g17l76amxx6bk42ia#o0r6mb@u7^fsjhyrs)g6n03ya'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
 # ALLOWED_HOSTS = ["*"]
 
