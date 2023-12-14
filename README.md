@@ -1,6 +1,6 @@
 # ProjetoPwebAPI
 
-## Como usar os códigos BackEnd
+## Como usar 
 
 1. Clone o repositório:
 ```
@@ -10,34 +10,19 @@ git clone https://github.com/ApenasUDev/ProjetoPwebAPI.git
 ```
 cd ProjetoPwebAPI
 ```
-3.Ative o ambiente virtual:
+3.Crie um ambiente virtual:
+```
+python3 -m venv venv
+```
+4.Ative o ambiente virtual:
 ```
 source venv/bin/activate
 ```
-Instale as dependências do projeto:
+5.Instale as dependências do projeto:
 ```
 pip install -r requirements.txt
 ```
-5.Inicie o servidor:
+6.Inicie o servidor:
 ```
 python3 manage.py runserver
-```
-## Como usar os códigos FrontEnd
-
-1.Navegue até o diretório do front:
-
-```
-cd frontend
-```
-2.Baixe as dependências:
-```
-npm install next
-```
-3.Rode o servidor:
-```
-npm run dev
-```
-4.Navegue no navegador na URL:
-```
-http://localhost:3000
 ```
