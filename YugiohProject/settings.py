@@ -60,6 +60,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_METHODS = ['GET','POST','OPTIONS']
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "https://projeto-pweb-six.vercel.app",
     # Add other origins as needed
 ]
 CORS_ALLOW_HEADERS = [
@@ -95,10 +96,16 @@ WSGI_APPLICATION = 'YugiohProject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 

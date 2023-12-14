@@ -134,21 +134,29 @@ def register(request):
         }
 
         try:
+            print('teste register 1')
             # Create the user
             pb.collection('users').create(data)
             token, user_data = auth_with_password(email, password)
+            print('token coletado')
+            
             # salvando no models
+            
             usuario = Usuario()
+            print('usuario inicial')
             usuario.username = username
             usuario.email = email
             usuario.password = password
             usuario.password_confirm = password_confirm
             usuario.name = name
             usuario.token = token
+            print('dados coletados')
             usuario.save()
+            print('dados salvos')
+            print(token)
+            
             # Authenticate the user after successful registration
             print('teste de token')
-            print(token)
             if token and user_data:
                 # Login the user in Django
                 return JsonResponse({'status': 'success', 'token': token, 'record': user_data})
@@ -161,45 +169,38 @@ def register(request):
 
 # Função de login
 def login(request):
-    pb_api_url = 'https://projetopwebapi.fly.dev/list-users'
-    pb = PocketBase('https://pocketbaseapipweb.fly.dev')
+    # pb = PocketBase('https://pocketbaseapipweb.fly.dev')
 
     # Obter parâmetros 'username' e 'password' da solicitação POST
     username = request.GET.get('username', '')
     password = request.GET.get('password', '')
 
-    # Fazer uma solicitação para a API para obter a lista de usuários
-    api_response = requests.get(pb_api_url)
-    api_users = api_response.json()
+    # # Verificar se o usuário existe
+    # results = pb.collection('users').get_list(1, 1, {"filter": f'username = "{username}"'})
 
-    # Verificar se o usuário existe na API
-    api_user = next((user for user in api_users if user['username'] == username), None)
+    # if not results.items:
+    #     return HttpResponse('Usuário não encontrado', status=404)
 
-    if not api_user:
-        return HttpResponse('Usuário não encontrado na API', status=404)
-
-    # Obter o token do usuário no PocketBase
-    user_id = api_user.get('id', '')
-    user_record = pb.collection('users').get_one(user_id)
+    # user_id = str(results.items[0])
+    # user_record = pb.collection('users').get_one(user_id[9:24])
 
     try:
         # Autenticar usuário com PocketBase
-        usuario = Usuario.objects.filter(username=username).first()
-
-        if usuario and usuario.password == password:
-            token = usuario.token
-        else:
-            return HttpResponse('Login ou senha incorretos')
+        usuario = Usuario.objects.filter(username = username)
+        for user in usuario:
+            if  user.password == password:
+                token = user.token
+            else:
+                return HttpResponse('login ou senha incorretos')
 
         if token:
             return JsonResponse({'status': 'success', 'token': token})
         else:
-            return JsonResponse({'status': 'error', 'message': 'Autenticação falhou'})
+            return JsonResponse({'status': 'error', 'message': 'Authentication failed'})
 
     except Exception as e:
         print(f"Erro no registro: {e}")
         return JsonResponse({'status': 'error', 'message': 'Erro no registro'})
-
     
 def dados_do_usuario(request):
     # Verificar se o token está presente no cabeçalho da solicitação
@@ -325,14 +326,3 @@ def visufavoritos(request):
     except Exception as e:
         print(f"Erro ao obter dados do usuário: {e}")
         return JsonResponse({'status': 'error', 'message': 'Erro ao obter dados do usuário'}, status=500)
-def return_users(request):
-    usuarios = Usuario.objects.all()
-
-    # Convert queryset to a list of dictionaries
-    usuarios_list = [{'id': usuario.id, 'nome': usuario.nome, 'email': usuario.email, 'username':usuario.username, 'password':usuario.password, 'password_confirm':usuario.password_confirm,'token':usuario.token} for usuario in usuarios]
-
-    # Create a JSON response
-    response_data = {'usuarios': usuarios_list}
-
-    # You can customize the JsonResponse as needed, setting appropriate headers, etc.
-    return JsonResponse(response_data)
